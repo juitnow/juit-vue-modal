@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "lib": [ "es2017", "dom" ],
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "removeComments": false,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "strict": true,
+    "target": "es2017",
+    "declaration": true,
+    "allowJs": false
+  },
+  "include": [ "src" ],
+}
