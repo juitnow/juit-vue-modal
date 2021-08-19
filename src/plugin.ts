@@ -1,8 +1,7 @@
 import {
   App,
-  ComponentPropsOptions,
   DefineComponent,
-  ObjectEmitsOptions,
+  EmitsOptions,
   Prop,
   VNode,
   defineComponent,
@@ -49,19 +48,11 @@ type InjectablePropTypes<O> = O extends object ? {
   [K in string]: any;
 };
 
-// A simple definition for the validation function of Vue's `emit`
-type EmitValidator<T> = (arg: T, ...args: any[]) => boolean
-// A validation function with no parameters (returning `void`)
-type EmitValidatorVoid = () => boolean
-
 // The type of the _first_ parameter of the `dismissModal` emitter in a
 // component or `unknown`, to properly return the typed value to our callers
-type DismissModalType<E> =
-  E extends ObjectEmitsOptions ?
-    E['dismissModal'] extends EmitValidatorVoid ? void :
-    E['dismissModal'] extends EmitValidator<infer T> ? T :
-    unknown :
-  unknown
+declare type DismissModalType<E> =
+  E extends { dismissModal : (...args: any[]) => any } ?
+    Parameters<E['dismissModal']>[0] : unknown;
 
 /* ========================================================================== *
  * COMPONENTS                                                                 *
@@ -128,7 +119,7 @@ const ModalStack = defineComponent({
  * ========================================================================== */
 
 // Push a new modal in our modals stack
-function createModal<P extends ComponentPropsOptions, E extends ObjectEmitsOptions>(
+function createModal<P, E extends EmitsOptions>(
     component: DefineComponent<P, any, any, any, any, any, any, E, any>,
     props?: InjectablePropTypes<P>,
 ): Promise<DismissModalType<E>> {
