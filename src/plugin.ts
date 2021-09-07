@@ -6,7 +6,6 @@ import {
   VNode,
   defineComponent,
   h,
-  reactive,
   warn,
 } from 'vue'
 
@@ -58,8 +57,8 @@ declare type DismissModalType<E> =
  * COMPONENTS                                                                 *
  * ========================================================================== */
 
-// An internal type associating modal component, props, resolution function and
-// (if mounted) a vnode
+// An internal type associating modal component definition, is props for
+// mounting, a function resolving the original promise and (if available) a vnode
 type ModalEntry = {
   component: DefineComponent<any, any, any, any, any, any, any, any, any, any, any, any>,
   props: Record<string, any> | undefined,
@@ -67,27 +66,43 @@ type ModalEntry = {
   vnode?: VNode | undefined,
 }
 
-// The ordered stack of all active modal IDs
-const stack = reactive([] as string[])
-
 // A record of modal entries keyed by their IDs. This is necessary so that only
-// the `stack` array above is _reactive_ while all the details associated with
-// their life cycle is now!
+// the `stack` array in `ModalStackComponent` is _reactive_ while all the
+// details associated with their life cycle is not!
 const entries: Record<string, ModalEntry> = {}
 
-// Flag for warning users when the modal stack compnent is mounted several times
-let mounted = false
+// Instance type of our `ModalStackComponent`
+export type ModalStack = InstanceType<typeof ModalStackComponent>
+
+// Current (available) `ModalStack`
+let modalStack: ModalStack | undefined = undefined
 
 // Our modal stack component, rendering one after another all open modals
-const ModalStack = defineComponent({
+export const ModalStackComponent = defineComponent({
+  emits: [ 'modals', 'modalCreated', 'modalDismissed' ],
+  data() {
+    return { stack: [] as string[] }
+  },
+  computed: {
+    hasModals(): boolean {
+      return this.stack.length > 0
+    },
+  },
+
   // Mounted here simply warns the about using <modal-stack/> multiple times
   mounted() {
-    if (mounted === true) warn('Vue modal stack component mounted multiple times')
-    mounted = true
+    if (modalStack) warn('Vue modal stack component mounted multiple times')
+    else modalStack = this
   },
+
+  // BeforeUnmount removes the ability to create modals
+  beforeUnmount() {
+    if (modalStack === this) modalStack = undefined
+  },
+
   // Render our stack of modals, one after another
   render() {
-    return stack.map((id) => {
+    return this.stack.map((id) => {
       const entry = entries[id]
 
       // If we created a vnode before, simply return it
@@ -95,21 +110,29 @@ const ModalStack = defineComponent({
 
       // Dismiss the modal, removing it from the stack, removing it from our
       // keyed hash of modals, and finally resolving the promise with the result
-      function onDismissModal(result: any): void {
-        const index = stack.indexOf(id)
-        if (index >= 0) stack.splice(index, 1)
+      const onDismissModal = (result: any): void => {
+        const index = this.stack.indexOf(id)
+        if (index >= 0) this.stack.splice(index, 1)
         delete entries[id]
         entry.resolve(result)
+
+        // Emit our events
+        this.$emit('modalCreated', this.hasModals)
+        this.$emit('modals', this.hasModals)
       }
 
       // Render our component in the VNODE tree tracking `dismissModal` events
-      const component = h(entry.component, {
+      const componentVNode = h(entry.component, {
         ...entry.props,
         onDismissModal,
       })
 
+      // Emit our events
+      this.$emit('modalDismissed', this.hasModals)
+      this.$emit('modals', this.hasModals)
+
       // Nicely wrap our modal component in a DIV: one modal, one DIV
-      return entry.vnode = h('div', { key: id, [`data-modal-${id}`]: '' }, component)
+      return entry.vnode = h('div', { [`data-modal-${id}`]: '' }, componentVNode)
     })
   },
 })
@@ -123,14 +146,19 @@ function createModal<P, E extends EmitsOptions>(
     component: DefineComponent<P, any, any, any, any, any, any, E, any>,
     props?: InjectablePropTypes<P>,
 ): Promise<DismissModalType<E>> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    if (! modalStack) {
+      warn('No ModalStack component mounted in current render tree')
+      reject(new Error('No ModalStack avaible'))
+    }
+
     // Get a random ID we can use to identify our DIVs
     const id = Math.floor((Math.random() * Number.MAX_SAFE_INTEGER))
         .toString(16).substr(0, 8).padStart(8, '0')
 
     // Push our ID, component, props and deferring methods in the stack
     entries[id] = { component, props, resolve }
-    stack.push(id)
+    modalStack?.stack.push(id)
   })
 }
 
@@ -159,6 +187,6 @@ declare module '@vue/runtime-core' {
 export const modals = {
   install(app: App): void {
     app.config.globalProperties.$createModal = createModal
-    app.component('ModalStack', ModalStack)
+    app.component('ModalStack', ModalStackComponent)
   },
 }
