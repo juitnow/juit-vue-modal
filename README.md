@@ -19,6 +19,13 @@ export const app = createSSRApp(App)
 Then, somewhere in your app use the `<modal-stack />` component (automatically
 registered) where you want your _modals_ to be mounted.
 
+The `<modal-stack />` component emits a few events, all with a single parameter
+indicating whether modals are currently active or not:
+
+* `modalCreated`: emitted every time a modal is created.
+* `modalDismissed`: emitted every time a modal is dismissed.
+* `modals`: emitted every time a modal is created or dismissed.
+
 A modal component might look like somewhat like this:
 
 ```html
