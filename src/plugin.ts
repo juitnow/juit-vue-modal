@@ -142,7 +142,7 @@ export const ModalStackComponent = defineComponent({
  * ========================================================================== */
 
 // Push a new modal in our modals stack
-function createModal<P, E extends EmitsOptions>(
+export function createModal<P, E extends EmitsOptions>(
     component: DefineComponent<P, any, any, any, any, any, any, E, any>,
     props?: InjectablePropTypes<P>,
 ): Promise<DismissModalType<E>> {
