@@ -7,7 +7,7 @@ import {
   defineComponent,
   h,
   warn,
-} from 'vue'
+} from '@vue/runtime-core'
 
 /* ========================================================================== *
  * TYPES                                                                      *
