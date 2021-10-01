@@ -1,16 +1,19 @@
 {
   "name": "@juit/vue-modal",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "TypeScript Modals for Vue.js 3",
-  "main": "dist/plugin.js",
+  "main": "dist-cjs/plugin.js",
+  "module": "dist-esm/plugin.js",
   "types": "dist/plugin.d.ts",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/juitnow/juit-vue-modal.git"
   },
   "scripts": {
-    "build": "rm -rf dist && npm run lint && npm run compile",
-    "compile": "tsc",
+    "build": "npm run lint && npm run build-cjs && npm run build-esm && npm run build-dts",
+    "build-cjs": "rm -rf dist-cjs && tsc --module commonjs --outDir dist-cjs",
+    "build-esm": "rm -rf dist-esm && tsc --module es2020 --outDir dist-esm",
+    "build-dts": "rm -rf dist && tsc --declaration true --emitDeclarationOnly",
     "lint": "eslint src",
     "lintfix": "eslint --fix src"
   },
@@ -21,15 +24,15 @@
   },
   "homepage": "https://github.com/juitnow/juit-vue-modal#readme",
   "peerDependencies": {
-    "vue": ">=3"
+    "@vue/runtime-core": ">=3"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.31.1",
-    "@typescript-eslint/parser": "^4.31.1",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
+    "@vue/runtime-core": ">=3",
     "eslint": "^7.32.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-deprecation": "^1.2.1",
-    "typescript": "^4.4.3",
-    "vue": "^3.2.11"
+    "typescript": "^4.4.3"
   }
 }
