@@ -154,7 +154,7 @@ export function createModal<P, E extends EmitsOptions>(
 
     // Get a random ID we can use to identify our DIVs
     const id = Math.floor((Math.random() * Number.MAX_SAFE_INTEGER))
-        .toString(16).substr(0, 8).padStart(8, '0')
+        .toString(16).substring(0, 8).padStart(8, '0')
 
     // Push our ID, component, props and deferring methods in the stack
     entries[id] = { component, props, resolve }

@@ -15,7 +15,8 @@
     "strict": true,
     "target": "es2017",
     "declaration": true,
-    "allowJs": false
+    "allowJs": false,
+    "skipLibCheck": true,
   },
   "include": [ "src" ],
 }
