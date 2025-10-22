@@ -1,12 +1,15 @@
 import {
+  defineComponent,
+  h,
+  warn,
+} from '@vue/runtime-core'
+
+import type {
   App,
   DefineComponent,
   EmitsOptions,
   Prop,
   VNode,
-  defineComponent,
-  h,
-  warn,
 } from '@vue/runtime-core'
 
 /* ========================================================================== *
@@ -18,11 +21,11 @@ import {
 // in the prop definition, and ignore defaults.
 type RequiredPropKeys<T> = {
   [K in keyof T]: T[K] extends { required: true } ? K : never
-} [keyof T];
+} [keyof T]
 
 // Extract the _optional_ property keys for a given component: this simply
 // negates `RequiredPropKeys` above.
-type OptionalKeys<T> = Exclude<keyof T, RequiredPropKeys<T>>;
+type OptionalKeys<T> = Exclude<keyof T, RequiredPropKeys<T>>
 
 // Infer the type for a property: this is cloned straight from Vue's source,
 // as it's not an exported type, dammit!!! :-)
@@ -34,7 +37,7 @@ type InferPropType<T> = [T] extends [null] ? any : [T] extends [{
   type: BooleanConstructor;
 }] ? boolean : [T] extends [DateConstructor | {
   type: DateConstructor;
-}] ? Date : [T] extends [Prop<infer V, infer D>] ? unknown extends V ? D : V : T;
+}] ? Date : [T] extends [Prop<infer V, infer D>] ? unknown extends V ? D : V : T
 
 // All _injectable_ properties (and types) for a component: this differs from
 // Vue's `ExtractPropTypes` (and it's simpler) as we simply want a Record of
@@ -45,13 +48,13 @@ type InjectablePropTypes<O> = O extends object ? {
   [K in OptionalKeys<O>]?: InferPropType<O[K]>;
 } : {
   [K in string]: any;
-};
+}
 
 // The type of the _first_ parameter of the `dismissModal` emitter in a
 // component or `unknown`, to properly return the typed value to our callers
 declare type DismissModalType<E> =
-  E extends { dismissModal : (...args: any[]) => any } ?
-    Parameters<E['dismissModal']>[0] : unknown;
+  E extends { dismissModal: (...args: any[]) => any } ?
+    Parameters<E['dismissModal']>[0] : unknown
 
 /* ========================================================================== *
  * COMPONENTS                                                                 *
@@ -92,7 +95,7 @@ export const ModalStackComponent = defineComponent({
   // Mounted here simply warns the about using <modal-stack/> multiple times
   mounted() {
     if (modalStack) warn('Vue modal stack component mounted multiple times')
-    else modalStack = this
+    else modalStack = this as any
   },
 
   // BeforeUnmount removes the ability to create modals
