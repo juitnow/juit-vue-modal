@@ -1,6 +1,6 @@
 {
   "name": "@juit/vue-modal",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "TypeScript Modals for Vue.js 3",
   "main": "dist-cjs/plugin.js",
   "module": "dist-esm/plugin.js",
@@ -27,7 +27,7 @@
     "@vue/runtime-core": ">=3"
   },
   "devDependencies": {
-    "@plugjs/eslint-plugin-vue": "^0.1.23",
+    "@plugjs/eslint-plugin-vue": "^0.1.24",
     "@vue/runtime-core": ">=3",
     "typescript": "^5.9.3"
   }
